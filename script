@@ -1,1 +1,124 @@
+local player = game:GetService("Players").LocalPlayer
+local UserInputService = game:GetService("UserInputService")
 
+-- Main GUI
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "KeyUnlocker"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 400, 0, 200)
+frame.Position = UDim2.new(0.5, -200, 0.5, -100)
+frame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+frame.BorderSizePixel = 0
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.Active = true
+frame.BackgroundTransparency = 1 -- Start invisible for fade-in
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+
+-- Fade-in effect
+task.spawn(function()
+	for i = 1, 10 do
+		frame.BackgroundTransparency = 1 - (i * 0.1)
+		task.wait(0.05)
+	end
+end)
+
+-- Title
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -20, 0, 30)
+title.Position = UDim2.new(0, 10, 0, 10)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(0, 255, 180)
+title.Text = "🧠 Authentication Panel"
+
+-- Textbox
+local keyBox = Instance.new("TextBox", frame)
+keyBox.Size = UDim2.new(1, -40, 0, 32)
+keyBox.Position = UDim2.new(0, 20, 0, 50)
+keyBox.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBox.Font = Enum.Font.Code
+keyBox.TextSize = 14
+keyBox.PlaceholderText = "Enter your secret key..."
+keyBox.Text = ""
+Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 6)
+
+-- Verify Button
+local verifyBtn = Instance.new("TextButton", frame)
+verifyBtn.Size = UDim2.new(0, 160, 0, 32)
+verifyBtn.Position = UDim2.new(0, 20, 0, 100)
+verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+verifyBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+verifyBtn.Font = Enum.Font.GothamBold
+verifyBtn.TextSize = 14
+verifyBtn.Text = "🔓 Verify Key"
+Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 6)
+
+-- Copy Link Button
+local copyBtn = Instance.new("TextButton", frame)
+copyBtn.Size = UDim2.new(0, 160, 0, 32)
+copyBtn.Position = UDim2.new(0, 220, 0, 100)
+copyBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+copyBtn.Font = Enum.Font.GothamBold
+copyBtn.TextSize = 14
+copyBtn.Text = "📎 Copy Link"
+Instance.new("UICorner", copyBtn).CornerRadius = UDim.new(0, 6)
+
+-- Status Label
+local statusLabel = Instance.new("TextLabel", frame)
+statusLabel.Size = UDim2.new(1, -20, 0, 24)
+statusLabel.Position = UDim2.new(0, 10, 0, 150)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Font = Enum.Font.Code
+statusLabel.TextSize = 13
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.Text = "Status: waiting..."
+
+-- Drag functionality
+do
+	local dragging, dragStart, startPos = false, nil, nil
+	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = input.Position
+			startPos = frame.Position
+		end
+	end)
+	frame.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local delta = input.Position - dragStart
+			frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+end
+
+-- Key verification
+verifyBtn.MouseButton1Click:Connect(function()
+	if keyBox.Text == "FISHINGKLZ112" then
+		statusLabel.Text = "✅ Correct key! Executing script..."
+		statusLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
+		gui:Destroy()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/Gr0wm3rc/cage-fish/refs/heads/main/script"))()
+	else
+		statusLabel.Text = "❌ Invalid key."
+		statusLabel.TextColor3 = Color3.fromRGB(255, 60, 60)
+	end
+end)
+
+-- Copy link
+copyBtn.MouseButton1Click:Connect(function()
+	setclipboard("https://cuty.io/firstcheck1")
+	statusLabel.Text = "🔗 Link copied! Paste it in your browser."
+	statusLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+end)
